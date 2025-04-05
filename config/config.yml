@@ -1,0 +1,7 @@
+env: "local"
+storage-path: "./storage/auth"
+tokenTTL: 30m
+grpc:
+  port: 20202
+  timeout: 10s
+

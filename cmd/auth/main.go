@@ -1,7 +1,14 @@
 package main
 
+import (
+	"Service/internal/config"
+	"fmt"
+)
+
 func main() {
-	// TODO: init config
+	cfg := config.New()
+
+	fmt.Printf("%+v\n", cfg)
 
 	// TODO: init logger
 
