@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/IlianBuh/Auth_Protobuf v0.0.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1 // indirect
 	github.com/ilyakaznacheev/cleanenv v1.5.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect

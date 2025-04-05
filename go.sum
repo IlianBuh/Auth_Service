@@ -1,5 +1,7 @@
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/IlianBuh/Auth_Protobuf v0.0.1 h1:3SiA6bb9SxifnC9J6bUvPWTPXxR11T6OoZbd4FZOCxQ=
+github.com/IlianBuh/Auth_Protobuf v0.0.1/go.mod h1:xXADqUai7sh5hSXnLf6R5Yaj70li3IENppgWiR/Ypbs=
 github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1 h1:KcFzXwzM/kGhIRHvc8jdixfIJjVzuUJdnv+5xsPutog=
 github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1/go.mod h1:qOchhhIlmRcqk/O9uCo/puJlyo07YINaIqdZfZG3Jkc=
 github.com/ilyakaznacheev/cleanenv v1.5.0 h1:0VNZXggJE2OYdXE87bfSSwGxeiGt9moSR2lOrsHHvr4=
