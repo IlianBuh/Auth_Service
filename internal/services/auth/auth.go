@@ -38,10 +38,11 @@ func New(
 	tokenTTL time.Duration,
 ) *Auth {
 	return &Auth{
-		log:    log,
-		usrPrv: usrPrv,
-		usrSv:  usrSv,
-		secret: secret,
+		log:      log,
+		usrPrv:   usrPrv,
+		usrSv:    usrSv,
+		secret:   secret,
+		tokenTTL: tokenTTL,
 	}
 }
 
