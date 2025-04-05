@@ -1,5 +1,6 @@
 env: "local"
 storage-path: "./storage/auth"
+secret: "secret"
 tokenTTL: 30m
 grpc:
   port: 20202

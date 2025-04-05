@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Env         string        `yaml:"env" env-default:"prod"`
 	StoragePath string        `yaml:"storage-path" env-required:"true"`
+	Secret      string        `yaml:"secret" env-required:"true"`
 	TokenTTL    time.Duration `yaml:"tokenTTL" env-default:"30m"`
 	GRPC        GRPCObj       `yaml:"grpc"`
 }
