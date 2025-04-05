@@ -32,6 +32,7 @@ type Auth interface {
 	) (string, error)
 }
 
+// New
 func New(
 	log *slog.Logger,
 	port int,
@@ -56,10 +57,10 @@ func New(
 	grpcsrv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			recovery.UnaryServerInterceptor(recoveryOpts...),
-			//logging.UnaryServerInterceptor(
-			//	logInterceptor(log),
-			//	loggingOpts...,
-			//),
+			logging.UnaryServerInterceptor(
+				logInterceptor(log),
+				loggingOpts...,
+			),
 		),
 	)
 
