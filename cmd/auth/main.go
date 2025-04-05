@@ -24,6 +24,7 @@ func main() {
 	// TODO: start application
 }
 
+// setUpLogger returns set logger according to current environment
 func setUpLogger(env string) *slog.Logger {
 	var log *slog.Logger
 
