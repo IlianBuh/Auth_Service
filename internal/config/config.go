@@ -29,7 +29,7 @@ func New() *Config {
 	path := fetchConfigPath()
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		panic("config file is not found")
+		panic("config file is not found: " + path)
 	}
 
 	var cfg Config
