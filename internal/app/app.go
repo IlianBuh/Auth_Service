@@ -3,7 +3,7 @@ package app
 import (
 	grpcapp "Service/internal/app/grpc"
 	"Service/internal/services/auth"
-	"Service/internal/storage"
+	"Service/internal/storage/sqlite"
 	"log/slog"
 	"time"
 )
@@ -21,9 +21,9 @@ func New(
 	timeout time.Duration,
 ) *App {
 
-	// TODO : init storage
+	st := sqlite.New(storagePath)
 
-	authsrvc := auth.New(log, &storage.Plug{}, &storage.Plug{}, secret, tokenTTL)
+	authsrvc := auth.New(log, st, st, secret, tokenTTL)
 
 	gRPCApp := grpcapp.New(log, port, timeout, authsrvc)
 
