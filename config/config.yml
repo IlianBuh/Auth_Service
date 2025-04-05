@@ -1,5 +1,5 @@
 env: "local"
-storage-path: "./storage/auth"
+storage-path: "./storage/auth/auth.db"
 secret: "secret"
 tokenTTL: 30m
 grpc:
