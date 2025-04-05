@@ -52,14 +52,14 @@ func New(
 			logging.PayloadReceived, logging.PayloadSent,
 		),
 	}
-
+	_ = loggingOpts
 	grpcsrv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			recovery.UnaryServerInterceptor(recoveryOpts...),
-			logging.UnaryServerInterceptor(
-				logInterceptor(log),
-				loggingOpts...,
-			),
+			//logging.UnaryServerInterceptor(
+			//	logInterceptor(log),
+			//	loggingOpts...,
+			//),
 		),
 	)
 
@@ -94,9 +94,12 @@ func (a *App) Run() error {
 	log := a.log.With(slog.String("op", op))
 	log.Info("starting gRPC application")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", a.port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
 	if err != nil {
-		log.Error("failed to listen addr", sl.Err(err), slog.Int("port", a.port))
+		log.Error(
+			"failed to listen addr",
+			sl.Err(err),
+			slog.Int("port", a.port))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
