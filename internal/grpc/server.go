@@ -1,7 +1,9 @@
 package grpcauth
 
 import (
+	"Service/internal/services/auth"
 	"context"
+	"errors"
 	"fmt"
 	authv1 "github.com/IlianBuh/Auth_Protobuf/gen/go"
 	"google.golang.org/grpc"
@@ -41,7 +43,9 @@ func (s *serverAPI) Login(
 
 	token, err := s.auth.Login(ctx, req.GetLogin(), req.GetPassword())
 	if err != nil {
-		// TODO : some special error
+		if errors.Is(err, auth.ErrInvalidArgument) {
+			return nil, status.Error(codes.InvalidArgument, "invalid arguments")
+		}
 
 		return nil, status.Error(codes.Internal, "internal error occurred")
 	}
@@ -50,6 +54,7 @@ func (s *serverAPI) Login(
 
 }
 
+// SignUp handlers SignUp-API request
 func (s *serverAPI) SignUp(
 	ctx context.Context,
 	req *authv1.SignUpRequest,
@@ -61,7 +66,9 @@ func (s *serverAPI) SignUp(
 
 	token, err := s.auth.SignUp(ctx, req.GetLogin(), req.GetEmail(), req.GetPassword())
 	if err != nil {
-		// TODO : some special error
+		if errors.Is(err, auth.ErrInvalidArgument) {
+			return nil, status.Error(codes.InvalidArgument, "invalid arguments")
+		}
 
 		return nil, status.Error(codes.Internal, "internal error occurred")
 	}
