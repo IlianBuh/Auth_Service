@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mattn/go-sqlite3"
+	"strings"
 	"time"
 )
 
@@ -50,8 +51,19 @@ func initDB(db *sql.DB) {
 	}
 }
 
-func (s *Storage) User(ctx context.Context, login string) (models.User, error) {
-	const op = "sqlite.User"
+func (s *Storage) User(ctx context.Context, key interface{}) (models.User, error) {
+	switch key.(type) {
+	case string:
+		return s.UserByLogin(ctx, key.(string))
+	case int:
+		return s.UserByUUID(ctx, key.(int))
+	default:
+		return models.User{}, storage.ErrInvalidUserKey
+	}
+}
+
+func (s *Storage) UserByLogin(ctx context.Context, login string) (models.User, error) {
+	const op = "sqlite.UserByLogin"
 	var user models.User
 
 	prep, err := s.db.PrepareContext(ctx, "SELECT uuid, login, email, passhash FROM users WHERE login=?;")
@@ -72,6 +84,69 @@ func (s *Storage) User(ctx context.Context, login string) (models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *Storage) UserByUUID(ctx context.Context, uuid int) (models.User, error) {
+	const op = "sqlite.UserByUUID"
+	var user models.User
+
+	prep, err := s.db.PrepareContext(ctx, "SELECT uuid, login, email, passhash FROM users WHERE uuid=?;")
+	if err != nil {
+		return user, fmt.Errorf("%s: %w", op, err)
+	}
+	defer prep.Close()
+
+	row := prep.QueryRowContext(ctx, uuid)
+
+	err = row.Scan(&user.UUID, &user.Login, &user.Email, &user.PassHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return user, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+		}
+
+		return user, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return user, nil
+}
+
+func (s *Storage) Users(ctx context.Context, uuids []int) ([]models.User, error) {
+	const op = "sqlite.Users"
+
+	prep, err := s.db.PrepareContext(
+		ctx,
+		`SELECT uuid, login, email, passhash FROM users WHERE uuid IN (`+
+			strings.TrimSuffix(strings.Repeat("?,", len(uuids)), ",")+
+			`);`)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	defer prep.Close()
+
+	args := make([]interface{}, len(uuids))
+	for i, uuid := range uuids {
+		args[i] = uuid
+	}
+	rows, err := prep.QueryContext(ctx, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	users := make([]models.User, 0)
+	var user models.User
+	for rows.Next() {
+		err = rows.Scan(&user.UUID, &user.Login, &user.Email, &user.PassHash)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	return users, nil
 }
 
 func (s *Storage) Save(ctx context.Context, login, email string, passHash []byte) (uint64, error) {

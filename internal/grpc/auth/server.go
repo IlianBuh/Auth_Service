@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	authv1 "github.com/IlianBuh/Auth_Protobuf/gen/go"
+	authv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

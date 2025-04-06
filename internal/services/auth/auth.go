@@ -14,7 +14,7 @@ import (
 )
 
 type UserProvider interface {
-	User(ctx context.Context, login string) (models.User, error)
+	User(ctx context.Context, key interface{}) (models.User, error)
 }
 
 type UserSaver interface {

@@ -1,7 +1,9 @@
 package grpcapp
 
 import (
-	grpcauth "Service/internal/grpc"
+	"Service/internal/domain/models"
+	grpcauth "Service/internal/grpc/auth"
+	grpcusrinfo "Service/internal/grpc/userinfo"
 	"Service/internal/lib/logger/sl"
 	"context"
 	"fmt"
@@ -31,6 +33,10 @@ type Auth interface {
 		login, email, password string,
 	) (string, error)
 }
+type UserInfo interface {
+	User(ctx context.Context, uuid int) (models.User, error)
+	Users(ctx context.Context, uuid []int) ([]models.User, error)
+}
 
 // New
 func New(
@@ -38,6 +44,7 @@ func New(
 	port int,
 	timeout time.Duration,
 	auth Auth,
+	usrInfo UserInfo,
 ) *App {
 	recoveryOpts := []recovery.Option{
 		recovery.WithRecoveryHandler(
@@ -65,6 +72,7 @@ func New(
 	)
 
 	grpcauth.Register(grpcsrv, auth)
+	grpcusrinfo.Register(grpcsrv, usrInfo)
 
 	return &App{
 		log:     log,
