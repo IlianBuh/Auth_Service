@@ -80,6 +80,12 @@ func (u *UserInfo) UsersExist(ctx context.Context, uuids []int) (bool, error) {
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
 
-	res = len(users) > 0
+	res = len(users) == len(uuids)
+	if !res {
+		log.Warn("some users don't exist")
+	} else {
+		log.Info("all users exist")
+	}
+
 	return res, nil
 }
