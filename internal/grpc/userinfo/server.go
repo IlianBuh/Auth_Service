@@ -15,6 +15,7 @@ import (
 type UserInfo interface {
 	User(ctx context.Context, uuid int) (models.User, error)
 	Users(ctx context.Context, uuid []int) ([]models.User, error)
+	UsersExist(ctx context.Context, uuid []int) (bool, error)
 }
 
 type serverAPI struct {
@@ -26,7 +27,7 @@ func Register(grpcsrv *grpc.Server, usrInfo UserInfo) {
 	userinfov1.RegisterUserInfoServer(grpcsrv, &serverAPI{usrInfo: usrInfo})
 }
 
-func (s serverAPI) Users(ctx context.Context, u *userinfov1.UsersRequest) (*userinfov1.UsersResponse, error) {
+func (s *serverAPI) Users(ctx context.Context, u *userinfov1.UsersRequest) (*userinfov1.UsersResponse, error) {
 	if err := validateUUIDs(u.GetUuids()...); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -41,7 +42,7 @@ func (s serverAPI) Users(ctx context.Context, u *userinfov1.UsersRequest) (*user
 	}, nil
 }
 
-func (s serverAPI) User(ctx context.Context, u *userinfov1.UserRequest) (*userinfov1.UserResponse, error) {
+func (s *serverAPI) User(ctx context.Context, u *userinfov1.UserRequest) (*userinfov1.UserResponse, error) {
 	if err := validateUUIDs(u.GetUuid()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -64,6 +65,20 @@ func (s serverAPI) User(ctx context.Context, u *userinfov1.UserRequest) (*userin
 	}, nil
 }
 
+func (s *serverAPI) UsersExist(ctx context.Context, u *userinfov1.UsersExistRequest) (*userinfov1.UsersExistResponse, error) {
+	if err := validateUUIDs(u.GetUuid()...); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "uuid can't be negative")
+	}
+
+	exist, err := s.usrInfo.UsersExist(ctx, mappers.Int32ToInt(u.GetUuid()...))
+	if err != nil {
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+
+	return &userinfov1.UsersExistResponse{
+		Exist: exist,
+	}, nil
+}
 func validateUUIDs(uuids ...int32) error {
 	for _, uuid := range uuids {
 		if uuid < 0 {

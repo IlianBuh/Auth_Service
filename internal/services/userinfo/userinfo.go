@@ -64,3 +64,28 @@ func (u *UserInfo) Users(ctx context.Context, uuids []int) ([]models.User, error
 	log.Info("successfully got user")
 	return users, nil
 }
+
+func (u *UserInfo) UsersExist(ctx context.Context, uuids []int) (bool, error) {
+	const op = "userinfo.UsersExist"
+	log := u.log.With(slog.String("op", op))
+	log.Info(
+		"starting to check if users exist",
+		slog.Any("uuids", uuids),
+	)
+	var res bool
+
+	users, err := u.usrPrv.Users(ctx, uuids)
+	if err != nil {
+		log.Error("failed to get users", sl.Err(err))
+		return false, fmt.Errorf("%s: %w", op, err)
+	}
+
+	res = len(users) == len(uuids)
+	if !res {
+		log.Warn("some users don't exist")
+	} else {
+		log.Info("all users exist")
+	}
+
+	return res, nil
+}

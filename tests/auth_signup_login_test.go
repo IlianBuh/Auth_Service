@@ -2,7 +2,7 @@ package tests
 
 import (
 	"Service/tests/suite"
-	authv1 "github.com/IlianBuh/Auth_Protobuf/gen/go"
+	authv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/auth"
 	"github.com/brianvoe/gofakeit"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
