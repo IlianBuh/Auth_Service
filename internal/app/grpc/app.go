@@ -36,6 +36,7 @@ type Auth interface {
 type UserInfo interface {
 	User(ctx context.Context, uuid int) (models.User, error)
 	Users(ctx context.Context, uuid []int) ([]models.User, error)
+	UsersExist(ctx context.Context, uuid []int) (bool, error)
 }
 
 // New
