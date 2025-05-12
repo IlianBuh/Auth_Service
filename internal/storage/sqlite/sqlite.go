@@ -162,6 +162,28 @@ func (s *Storage) Users(ctx context.Context, uuids []int) ([]models.User, error)
 	return users, nil
 }
 
+func (s *Storage) UsersByLogin(ctx context.Context, login string) ([]models.User, error) {
+	const op = "sqlite.UsersByLogin"
+	const slctQuery = `
+		SELECT uuid, login, email 
+		FROM users
+		WHERE login LIKE ?
+	`
+
+	rows, err := s.db.QueryContext(ctx, slctQuery, login+"%")
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+	defer rows.Close()
+
+	users, err := s.scanUsers(rows)
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+
+	return users, nil
+}
+
 func (s *Storage) Save(ctx context.Context, login, email string, passHash []byte) (uint64, error) {
 	const op = "sqlite.Save"
 	uuid := uint64(0)
@@ -249,7 +271,7 @@ func (s *Storage) Followers(
 	}
 	defer rows.Close()
 
-	users, err := s.scanFollowUsers(rows)
+	users, err := s.scanUsers(rows)
 	if err != nil {
 		return nil, e.Fail(op, err)
 	}
@@ -275,7 +297,7 @@ func (s *Storage) Followees(
 	}
 	defer rows.Close()
 
-	users, err := s.scanFollowUsers(rows)
+	users, err := s.scanUsers(rows)
 	if err != nil {
 		return nil, e.Fail(op, err)
 	}
@@ -283,7 +305,7 @@ func (s *Storage) Followees(
 	return users, nil
 }
 
-func (s *Storage) scanFollowUsers(rows *sql.Rows) ([]models.User, error) {
+func (s *Storage) scanUsers(rows *sql.Rows) ([]models.User, error) {
 	const op = "sqlite.scanFollowUsers"
 
 	users := make([]models.User, 0)
