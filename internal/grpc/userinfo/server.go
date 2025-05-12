@@ -6,6 +6,7 @@ import (
 	"Service/internal/services/userinfo"
 	"context"
 	"errors"
+	userv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/user"
 	userinfov1 "github.com/IlianBuh/SSO_Protobuf/gen/go/userinfo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -57,7 +58,7 @@ func (s *serverAPI) User(ctx context.Context, u *userinfov1.UserRequest) (*useri
 	}
 
 	return &userinfov1.UserResponse{
-		User: &userinfov1.User{
+		User: &userv1.User{
 			Uuid:  int32(user.UUID),
 			Login: user.Login,
 			Email: user.Email,
