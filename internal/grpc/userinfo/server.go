@@ -6,6 +6,8 @@ import (
 	"Service/internal/services/userinfo"
 	"context"
 	"errors"
+	"strings"
+
 	userv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/user"
 	userinfov1 "github.com/IlianBuh/SSO_Protobuf/gen/go/userinfo"
 	"google.golang.org/grpc"
@@ -17,6 +19,7 @@ type UserInfo interface {
 	User(ctx context.Context, uuid int) (models.User, error)
 	Users(ctx context.Context, uuid []int) ([]models.User, error)
 	UsersExist(ctx context.Context, uuid []int) (bool, error)
+	UsersByLogin(ctx context.Context, login string) ([]models.User, error)
 }
 
 type serverAPI struct {
@@ -43,6 +46,23 @@ func (s *serverAPI) Users(ctx context.Context, u *userinfov1.UsersRequest) (*use
 	}, nil
 }
 
+func (s *serverAPI) UsersByLogin(
+	ctx context.Context,
+	u *userinfov1.UsersByLoginRequest,
+) (*userinfov1.UsersByLoginResponse, error) {
+	if err := validateLogin(u.GetLogin()); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	users, err := s.usrInfo.UsersByLogin(ctx, u.GetLogin())
+	if err != nil {
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+
+	return &userinfov1.UsersByLoginResponse{
+		Users: mappers.ModelUsersToAPI(users...),
+	}, nil
+}
 func (s *serverAPI) User(ctx context.Context, u *userinfov1.UserRequest) (*userinfov1.UserResponse, error) {
 	if err := validateUUIDs(u.GetUuid()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -85,6 +105,13 @@ func validateUUIDs(uuids ...int32) error {
 		if uuid < 0 {
 			return errors.New("uuid can't be negative")
 		}
+	}
+	return nil
+}
+
+func validateLogin(login string) error {
+	if len(strings.Trim(login, " ")) == 0 {
+		return errors.New("login can't be empty")
 	}
 	return nil
 }
