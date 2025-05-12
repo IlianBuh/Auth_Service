@@ -40,6 +40,7 @@ type UserInfo interface {
 	User(ctx context.Context, uuid int) (models.User, error)
 	Users(ctx context.Context, uuid []int) ([]models.User, error)
 	UsersExist(ctx context.Context, uuid []int) (bool, error)
+	UsersByLogin(ctx context.Context, login string) ([]models.User, error)
 }
 
 type FollowProvider interface {
