@@ -2,14 +2,14 @@ package mappers
 
 import (
 	"Service/internal/domain/models"
-	userinfov1 "github.com/IlianBuh/SSO_Protobuf/gen/go/userinfo"
+	userv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/user"
 )
 
-func ModelUsersToAPI(users ...models.User) []*userinfov1.User {
-	res := make([]*userinfov1.User, len(users))
+func ModelUsersToAPI(users ...models.User) []*userv1.User {
+	res := make([]*userv1.User, len(users))
 
 	for i, user := range users {
-		res[i] = &userinfov1.User{
+		res[i] = &userv1.User{
 			Uuid:  int32(user.UUID),
 			Login: user.Login,
 			Email: user.Email,
