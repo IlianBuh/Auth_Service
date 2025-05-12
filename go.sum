@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/IlianBuh/SSO_Protobuf v0.0.4 h1:vEGF2T5xz3qeOseEA7TaMY8Ejzx8uNEMByBylQ/13pY=
-github.com/IlianBuh/SSO_Protobuf v0.0.4/go.mod h1:qbbWln81jp5BMA6/Tj061e+xhBWgc7dZ45VTpRWXDZ8=
+github.com/IlianBuh/SSO_Protobuf v0.0.10 h1:dsar93lr0d/QED58lwkr1ZXj4QnhzX0LBp1MrdZCV2U=
+github.com/IlianBuh/SSO_Protobuf v0.0.10/go.mod h1:qbbWln81jp5BMA6/Tj061e+xhBWgc7dZ45VTpRWXDZ8=
 github.com/brianvoe/gofakeit v3.18.0+incompatible h1:wDOmHc9DLG4nRjUVVaxA+CEglKOW72Y5+4WNxUIkjM8=
 github.com/brianvoe/gofakeit v3.18.0+incompatible/go.mod h1:kfwdRA90vvNhPutZWfH7WPaDzUjz+CZFqG+rPkOjGOc=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
