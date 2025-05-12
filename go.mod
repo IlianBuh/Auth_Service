@@ -3,7 +3,7 @@ module Service
 go 1.24
 
 require (
-	github.com/IlianBuh/SSO_Protobuf v0.0.9
+	github.com/IlianBuh/SSO_Protobuf v0.0.10
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1
