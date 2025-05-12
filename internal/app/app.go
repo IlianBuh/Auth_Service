@@ -3,6 +3,7 @@ package app
 import (
 	grpcapp "Service/internal/app/grpc"
 	"Service/internal/services/auth"
+	"Service/internal/services/follow"
 	"Service/internal/services/userinfo"
 	"Service/internal/storage/sqlite"
 	"log/slog"
@@ -26,7 +27,8 @@ func New(
 
 	authsrvc := auth.New(log, st, st, secret, tokenTTL)
 	usrInfo := userinfo.New(log, st)
-	gRPCApp := grpcapp.New(log, port, timeout, authsrvc, usrInfo)
+	fllw := follow.New(log, st, st, st)
+	gRPCApp := grpcapp.New(log, port, timeout, authsrvc, usrInfo, fllw)
 
 	return &App{
 		GRPCApp: gRPCApp,
