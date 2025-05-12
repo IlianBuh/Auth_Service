@@ -12,7 +12,7 @@ import (
 )
 
 func TestSignUpLoginPositive(t *testing.T) {
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewSuiteAuth(t)
 
 	login := gofakeit.FirstName()
 	email := gofakeit.Email()
@@ -62,7 +62,7 @@ func TestSignUpLoginPositive(t *testing.T) {
 }
 
 func TestDoubleSignUp(t *testing.T) {
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewSuiteAuth(t)
 
 	login := gofakeit.FirstName()
 	email := gofakeit.Email()
