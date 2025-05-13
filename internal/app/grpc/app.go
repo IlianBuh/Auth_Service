@@ -3,18 +3,20 @@ package grpcapp
 import (
 	"Service/internal/domain/models"
 	grpcauth "Service/internal/grpc/auth"
+	grpcfollow "Service/internal/grpc/follow"
 	grpcusrinfo "Service/internal/grpc/userinfo"
 	"Service/internal/lib/logger/sl"
 	"context"
 	"fmt"
+	"log/slog"
+	"net"
+	"time"
+
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log/slog"
-	"net"
-	"time"
 )
 
 type App struct {
@@ -33,10 +35,31 @@ type Auth interface {
 		login, email, password string,
 	) (string, error)
 }
+
 type UserInfo interface {
 	User(ctx context.Context, uuid int) (models.User, error)
 	Users(ctx context.Context, uuid []int) ([]models.User, error)
 	UsersExist(ctx context.Context, uuid []int) (bool, error)
+	UsersByLogin(ctx context.Context, login string) ([]models.User, error)
+}
+
+type FollowProvider interface {
+	Follow(
+		ctx context.Context,
+		src, target int,
+	) error
+	Unfollow(
+		ctx context.Context,
+		src, target int,
+	) error
+	Followers(
+		ctx context.Context,
+		uuid int,
+	) ([]models.User, error)
+	Followees(
+		ctx context.Context,
+		uuid int,
+	) ([]models.User, error)
 }
 
 // New
@@ -46,6 +69,7 @@ func New(
 	timeout time.Duration,
 	auth Auth,
 	usrInfo UserInfo,
+	followProvider FollowProvider,
 ) *App {
 	recoveryOpts := []recovery.Option{
 		recovery.WithRecoveryHandler(
@@ -65,15 +89,19 @@ func New(
 	grpcsrv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			recovery.UnaryServerInterceptor(recoveryOpts...),
-			logging.UnaryServerInterceptor(
-				logInterceptor(log),
-				loggingOpts...,
-			),
+			// this part is necessary for logging.
+			// I commented it because logs are to large and unreadable
+			//
+			// logging.UnaryServerInterceptor(
+			// 	logInterceptor(log),
+			// 	loggingOpts...,
+			// ),
 		),
 	)
 
 	grpcauth.Register(grpcsrv, auth)
 	grpcusrinfo.Register(grpcsrv, usrInfo)
+	grpcfollow.Register(grpcsrv, followProvider)
 
 	return &App{
 		log:     log,

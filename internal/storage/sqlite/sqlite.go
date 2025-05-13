@@ -7,9 +7,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/mattn/go-sqlite3"
 	"strings"
 	"time"
+
+	e "Service/internal/lib/errors"
+
+	"github.com/mattn/go-sqlite3"
 )
 
 type Storage struct {
@@ -43,8 +46,18 @@ func initDB(db *sql.DB) {
 					login TEXT NOT NULL UNIQUE,
 					email TEXT NOT NULL UNIQUE,
 					passhash BLOB NOT NULL
-				);
-				CREATE INDEX IF NOT EXISTS idx_uuid ON users(uuid)`,
+		);
+
+		CREATE INDEX IF NOT EXISTS idx_uuid ON users(uuid);
+
+		CREATE TABLE IF NOT EXISTS followings (
+			follower INTEGER NOT NULL,
+			followee INTEGER NOT NULL,
+			PRIMARY KEY(follower, followee),
+			FOREIGN KEY (follower) REFERENCES users(uuid) ON DELETE CASCADE,
+			FOREIGN KEY (followee) REFERENCES users(uuid) ON DELETE CASCADE
+		);
+		`,
 	)
 	if err != nil {
 		panic("initDB: failed to prepare query - " + err.Error())
@@ -149,6 +162,28 @@ func (s *Storage) Users(ctx context.Context, uuids []int) ([]models.User, error)
 	return users, nil
 }
 
+func (s *Storage) UsersByLogin(ctx context.Context, login string) ([]models.User, error) {
+	const op = "sqlite.UsersByLogin"
+	const slctQuery = `
+		SELECT uuid, login, email 
+		FROM users
+		WHERE login LIKE ?
+	`
+
+	rows, err := s.db.QueryContext(ctx, slctQuery, login+"%")
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+	defer rows.Close()
+
+	users, err := s.scanUsers(rows)
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+
+	return users, nil
+}
+
 func (s *Storage) Save(ctx context.Context, login, email string, passHash []byte) (uint64, error) {
 	const op = "sqlite.Save"
 	uuid := uint64(0)
@@ -181,4 +216,108 @@ func (s *Storage) Save(ctx context.Context, login, email string, passHash []byte
 
 	uuid = uint64(temp)
 	return uuid, nil
+}
+
+func (s *Storage) Follow(
+	ctx context.Context,
+	src, target int,
+) error {
+	const op = "sqlite.Follow"
+	const insrtQuery = `
+		INSERT INTO followings(follower, followee) VALUES($1, $2);
+	`
+
+	_, err := s.db.ExecContext(ctx, insrtQuery, src, target)
+	if err != nil {
+		return e.Fail(op, err)
+	}
+
+	return nil
+}
+
+func (s *Storage) Unfollow(
+	ctx context.Context,
+	src, target int,
+) error {
+	const op = "sqlite.Unfollow"
+	const insrtQuery = `
+		DELETE FROM followings WHERE follower=$1 AND followee=$2;
+	`
+
+	_, err := s.db.ExecContext(ctx, insrtQuery, src, target)
+	if err != nil {
+		return e.Fail(op, err)
+	}
+
+	return nil
+
+}
+
+func (s *Storage) Followers(
+	ctx context.Context,
+	uuid int,
+) ([]models.User, error) {
+	const op = "sqlite.Followers"
+	const insrtQuery = `
+		SELECT uuid, login, email
+		FROM users
+		JOIN followings ON followings.follower = users.uuid
+		WHERE followee=$1
+	`
+
+	rows, err := s.db.QueryContext(ctx, insrtQuery, uuid)
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+	defer rows.Close()
+
+	users, err := s.scanUsers(rows)
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+
+	return users, nil
+}
+
+func (s *Storage) Followees(
+	ctx context.Context,
+	uuid int,
+) ([]models.User, error) {
+	const op = "sqlite.Followees"
+	const insrtQuery = `
+		SELECT uuid, login, email
+		FROM users
+		JOIN followings ON followings.followee = users.uuid
+		WHERE follower=$1
+	`
+
+	rows, err := s.db.QueryContext(ctx, insrtQuery, uuid)
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+	defer rows.Close()
+
+	users, err := s.scanUsers(rows)
+	if err != nil {
+		return nil, e.Fail(op, err)
+	}
+
+	return users, nil
+}
+
+func (s *Storage) scanUsers(rows *sql.Rows) ([]models.User, error) {
+	const op = "sqlite.scanFollowUsers"
+
+	users := make([]models.User, 0)
+	var user models.User
+	for rows.Next() {
+
+		if err := rows.Scan(&user.UUID, &user.Login, &user.Email); err != nil {
+			return nil, e.Fail(op, err)
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }

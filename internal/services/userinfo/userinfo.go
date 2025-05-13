@@ -2,6 +2,7 @@ package userinfo
 
 import (
 	"Service/internal/domain/models"
+	e "Service/internal/lib/errors"
 	"Service/internal/lib/logger/sl"
 	"Service/internal/storage"
 	"context"
@@ -13,6 +14,7 @@ import (
 type UserProvider interface {
 	User(ctx context.Context, key interface{}) (models.User, error)
 	Users(ctx context.Context, uuid []int) ([]models.User, error)
+	UsersByLogin(ctx context.Context, login string) ([]models.User, error)
 }
 
 type UserInfo struct {
@@ -88,4 +90,19 @@ func (u *UserInfo) UsersExist(ctx context.Context, uuids []int) (bool, error) {
 	}
 
 	return res, nil
+}
+
+func (u *UserInfo) UsersByLogin(ctx context.Context, login string) ([]models.User, error) {
+	const op = "userinfo.UsersByLogin"
+	log := u.log.With(slog.String("op", op))
+	log.Info("starting to fetch users", slog.String("login", login))
+
+	users, err := u.usrPrv.UsersByLogin(ctx, login)
+	if err != nil {
+		log.Error("failed to fetch users", sl.Err(err))
+		return nil, e.Fail(op, err)
+	}
+
+	log.Info("fethcing ended")
+	return users, nil
 }

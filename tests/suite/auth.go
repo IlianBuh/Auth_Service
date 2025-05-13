@@ -11,16 +11,15 @@ import (
 	"testing"
 )
 
-type Suite struct {
+type SuiteAuth struct {
 	*testing.T
 	Cfg    *config.Config
 	Client authv1.AuthClient
 }
 
-func New(t *testing.T) (context.Context, *Suite) {
+func NewSuiteAuth(t *testing.T, cfg *config.Config) (context.Context, *SuiteAuth) {
 	t.Helper()
 	t.Parallel()
-	cfg := config.New()
 
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.GRPC.Timeout)
 	t.Cleanup(func() {
@@ -38,7 +37,7 @@ func New(t *testing.T) (context.Context, *Suite) {
 	}
 
 	client := authv1.NewAuthClient(cc)
-	return ctx, &Suite{
+	return ctx, &SuiteAuth{
 		Client: client,
 		Cfg:    cfg,
 	}
