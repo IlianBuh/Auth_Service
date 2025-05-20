@@ -240,11 +240,11 @@ func (s *Storage) Unfollow(
 	src, target int,
 ) error {
 	const op = "sqlite.Unfollow"
-	const insrtQuery = `
+	const deleteQuery = `
 		DELETE FROM followings WHERE follower=$1 AND followee=$2;
 	`
 
-	_, err := s.db.ExecContext(ctx, insrtQuery, src, target)
+	_, err := s.db.ExecContext(ctx, deleteQuery, src, target)
 	if err != nil {
 		return e.Fail(op, err)
 	}
