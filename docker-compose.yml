@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  sso:
+    container_name: sso
+    build: 
+      context: ~/Pet-project/SSO/SSO_Service
+    restart: always
+    volumes:
+      - ./storage:/app/storage  # Adjust the container path as needed
+    networks:
+      - blogs-app
+
+  grahpql:
+    container_name: graphql
+    build: 
+      context: ~/Pet-project/GraphQL
+    restart: always
+    depends_on:
+      - sso
+    networks:
+      - blogs-app
+
+networks:
+  blogs-app:
+    driver: bridge

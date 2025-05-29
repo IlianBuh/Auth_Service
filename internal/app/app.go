@@ -19,13 +19,14 @@ func New(
 	storagePath string,
 	secret string,
 	tokenTTL time.Duration,
+	refreshTTL time.Duration,
 	port int,
 	timeout time.Duration,
 ) *App {
 
 	st := sqlite.New(storagePath)
 
-	authsrvc := auth.New(log, st, st, secret, tokenTTL)
+	authsrvc := auth.New(log, st, st, st, secret, tokenTTL, refreshTTL)
 	usrInfo := userinfo.New(log, st)
 	fllw := follow.New(log, st, st, st)
 	gRPCApp := grpcapp.New(log, port, timeout, authsrvc, usrInfo, fllw)

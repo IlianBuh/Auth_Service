@@ -3,7 +3,7 @@ package suite
 import (
 	"Service/internal/config"
 	"context"
-	authv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/auth"
+	followv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/follow"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net"
@@ -11,15 +11,14 @@ import (
 	"testing"
 )
 
-type SuiteAuth struct {
+type SuiteFollow struct {
 	*testing.T
 	Cfg    *config.Config
-	Client authv1.AuthClient
+	Client followv1.FollowClient
 }
 
-func NewSuiteAuth(t *testing.T, cfg *config.Config) (context.Context, *SuiteAuth) {
+func NewSuiteFollow(t *testing.T, cfg *config.Config) (context.Context, *SuiteFollow) {
 	t.Helper()
-	t.Parallel()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(func() {
@@ -36,8 +35,8 @@ func NewSuiteAuth(t *testing.T, cfg *config.Config) (context.Context, *SuiteAuth
 		t.Fatalf("failed to connect to grpc server: %v", err)
 	}
 
-	client := authv1.NewAuthClient(cc)
-	return ctx, &SuiteAuth{
+	client := followv1.NewFollowClient(cc)
+	return ctx, &SuiteFollow{
 		Client: client,
 		Cfg:    cfg,
 	}

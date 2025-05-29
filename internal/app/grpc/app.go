@@ -29,11 +29,15 @@ type Auth interface {
 	Login(
 		ctx context.Context,
 		login, password string,
-	) (string, error)
+	) (models.TokensPair, error)
 	SignUp(
 		ctx context.Context,
 		login, email, password string,
-	) (string, error)
+	) (models.TokensPair, error)
+	UpdateTokens(
+		ctx context.Context,
+		refreshToken string,
+	) (models.TokensPair, error)
 }
 
 type UserInfo interface {

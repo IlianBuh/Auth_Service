@@ -57,6 +57,14 @@ func initDB(db *sql.DB) {
 			FOREIGN KEY (follower) REFERENCES users(uuid) ON DELETE CASCADE,
 			FOREIGN KEY (followee) REFERENCES users(uuid) ON DELETE CASCADE
 		);
+
+		DROP TABLE IF EXISTS tokens;
+
+		CREATE TABLE IF NOT EXISTS tokens (
+			id integer PRIMARY KEY,
+			refresh_token TEXT NOT NULL,
+			access_token TEXT NOT NULL
+		)
 		`,
 	)
 	if err != nil {
@@ -303,6 +311,56 @@ func (s *Storage) Followees(
 	}
 
 	return users, nil
+}
+
+func (s *Storage) StoreToken(
+	ctx context.Context,
+	refreshToken, accessToken string,
+) error {
+	const op = "sqlite.StoreToken"
+	const insrtQuery = `
+		INSERT INTO tokens(refresh_token, access_token) VALUES(?, ?);
+	`
+	_, err := s.db.ExecContext(ctx, insrtQuery, refreshToken, accessToken)
+	if err != nil {
+		return e.Fail(op, err)
+	}
+
+	return nil
+}
+
+func (s *Storage) Token(
+	ctx context.Context,
+	refreshToken string,
+) (string, error) {
+	const op = "sqlite.StoreToken"
+	const insrtQuery = `
+		SELECT access_token FROM tokens WHERE refresh_token=?;
+	`
+	row := s.db.QueryRowContext(ctx, insrtQuery, refreshToken)
+	var token string
+	if err := row.Scan(&token); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", e.Fail(op, storage.ErrNotFound)
+		}
+
+		return "", e.Fail(op, err)
+	}
+
+	return token, nil
+}
+
+func (s *Storage) DeleteToken(ctx context.Context, refreshToken string) error {
+	const op = "sqlite.DeleteToken"
+	const deleteQuery = `
+		DELETE FROM tokens WHERE refresh_token = ?;
+	`
+	_, err := s.db.ExecContext(ctx, deleteQuery, refreshToken)
+	if err != nil {
+		return e.Fail(op, err)
+	}
+
+	return nil
 }
 
 func (s *Storage) scanUsers(rows *sql.Rows) ([]models.User, error) {

@@ -12,6 +12,7 @@ type Config struct {
 	StoragePath string        `yaml:"storage-path" env-required:"true"`
 	Secret      string        `yaml:"secret" env-required:"true"`
 	TokenTTL    time.Duration `yaml:"tokenTTL" env-default:"30m"`
+	RefreshTTL  time.Duration `yaml:"refreshTTL" env-default:"7d"`
 	GRPC        GRPCObj       `yaml:"grpc"`
 }
 
@@ -21,7 +22,7 @@ type GRPCObj struct {
 }
 
 const (
-	defaultConfigPath = "./config/config.yml"
+	defaultConfigPath = "/home/il/Pet-project/SSO/SSO_Service/config/config.yml"
 )
 
 // New returns new config object

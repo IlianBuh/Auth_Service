@@ -27,6 +27,7 @@ func main() {
 		cfg.StoragePath,
 		cfg.Secret,
 		cfg.TokenTTL,
+		cfg.RefreshTTL,
 		cfg.GRPC.Port,
 		cfg.GRPC.Timeout,
 	)

@@ -1,26 +1,32 @@
 package grpcauth
 
 import (
+	"Service/internal/domain/models"
 	"Service/internal/services/auth"
 	"context"
 	"errors"
 	"fmt"
+	"net/mail"
+
 	authv1 "github.com/IlianBuh/SSO_Protobuf/gen/go/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/mail"
 )
 
 type Auth interface {
 	Login(
 		ctx context.Context,
 		login, password string,
-	) (string, error)
+	) (models.TokensPair, error)
 	SignUp(
 		ctx context.Context,
 		login, email, password string,
-	) (string, error)
+	) (models.TokensPair, error)
+	UpdateTokens(
+		ctx context.Context,
+		refreshToken string,
+	) (models.TokensPair, error)
 }
 type serverAPI struct {
 	authv1.UnimplementedAuthServer
@@ -50,7 +56,10 @@ func (s *serverAPI) Login(
 		return nil, status.Error(codes.Internal, "internal error occurred")
 	}
 
-	return &authv1.LoginResponse{Token: token}, nil
+	return &authv1.LoginResponse{
+		RefreshToken: token.RefreshToken.Val,
+		AccessToken:  token.AccessToken.Val,
+	}, nil
 
 }
 
@@ -73,8 +82,32 @@ func (s *serverAPI) SignUp(
 		return nil, status.Error(codes.Internal, "internal error occurred")
 	}
 
-	return &authv1.SignUpResponse{Token: token}, nil
+	return &authv1.SignUpResponse{
+		RefreshToken: token.RefreshToken.Val,
+		AccessToken:  token.AccessToken.Val,
+	}, nil
+}
 
+func (s *serverAPI) UpdateTokens(
+	ctx context.Context,
+	req *authv1.UpdateRequest,
+) (*authv1.UpdateResponse, error) {
+	tokens, err := s.auth.UpdateTokens(ctx, req.GetRefreshToken())
+	if err != nil {
+		if errors.Is(err, auth.ErrExpired) {
+			return nil, status.Error(codes.Unauthenticated, "token is expiret")
+		}
+		if errors.Is(err, auth.ErrNoToken) {
+			return nil, status.Error(codes.Unauthenticated, "token does not exist")
+		}
+
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+
+	return &authv1.UpdateResponse{
+		AccessToken:  tokens.AccessToken.Val,
+		RefreshToken: tokens.RefreshToken.Val,
+	}, nil
 }
 
 // validateLogin validates user's request to log in
